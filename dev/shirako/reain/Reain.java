@@ -77,7 +77,7 @@ public class Reain extends JFrame {
         clip.open(audioInputStream);
         clip.start();
 
-        timer = new Timer(0, e -> {
+        Timer timer = new Timer(15, e -> {
             drawBlocks();
             repaint();
         });
