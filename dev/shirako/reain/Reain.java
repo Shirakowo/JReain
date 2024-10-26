@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.awt.image.*;
 import javax.imageio.*;
 import javax.swing.*;
+import javax.sound.sampled.*;
 
 public class Reain extends JFrame {
     private Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
@@ -78,6 +79,11 @@ public class Reain extends JFrame {
         });
         bi = new BufferedImage(sw, sh, BufferedImage.TYPE_INT_ARGB);
         g = bi.getGraphics();
+
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("/Resources/Harumachi.wav"));
+        Clip clip = AudioSystem.getClip();
+        clip.open(audioInputStream);
+        clip.start();
 
         setVisible(true);
     }
