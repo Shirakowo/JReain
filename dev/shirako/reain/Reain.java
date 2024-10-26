@@ -11,7 +11,6 @@ public class Reain extends JFrame {
     private Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
     private BufferedImage bi;
     private Graphics g;
-    public Timer timer;
     private final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     private final GraphicsDevice gd = ge.getDefaultScreenDevice();
     private final DisplayMode dm = gd.getDisplayMode();
