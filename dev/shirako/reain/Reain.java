@@ -8,6 +8,40 @@ import javax.swing.*;
 import javax.sound.sampled.*;
 
 public class Reain extends JFrame {
+    private class Note {
+        private int x; // PosX
+        private int y; // PosY
+
+        public Note(int block) {
+            switch (block) {
+                case 0:
+                    this.x = (int)(xw-108*1.5-108/2);
+                    break;
+                case 1:
+                    this.x = (int)(xw-108*0.5-108/2);
+                    break;
+                case 2:
+                    this.x = (int)(xw+108*0.5-108/2);
+                    break;
+                case 3:
+                    this.x = (int)(xw+108*1.5-108/2);
+                    break;
+                default:
+                    throw new IllegalArgumentException("The value of block is out of range");
+            }
+            this.y = 0;
+        }
+
+        public void move() {
+            y += 10;
+        }
+
+        public void drawNote(Graphics g) {
+            g.setColor(Color.white);
+            g.fillRect(x, y, 108, 27);
+        }
+    }
+
     private Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
     private BufferedImage bi;
     private Graphics g;
@@ -16,6 +50,8 @@ public class Reain extends JFrame {
     private final DisplayMode dm = gd.getDisplayMode();
     private final int sw = dm.getWidth();
     private final int sh = dm.getHeight();
+    private final int xw = sw / 2;
+    private final int yh = sh / 2;
 
     public Reain() throws Exception {
         setTitle("Reain");
@@ -77,9 +113,14 @@ public class Reain extends JFrame {
         clip.open(audioInputStream);
         clip.start();
 
+        Note[] note = {new Note(0), new Note(1), new Note(2), new Note(3)};
         Timer timer = new Timer(15, e -> {
             drawBlocks();
             repaint();
+            for (Note n : note) {
+                n.move();
+                n.drawNote(g);
+            }
         });
         timer.start();
 
@@ -87,8 +128,6 @@ public class Reain extends JFrame {
     }
 
     private void drawBlocks() {
-        int xw = sw / 2;
-        int yh = sh / 2;
 
         g.setColor(getBackground());
         g.fillRect(0, 0, getWidth(), getHeight());
