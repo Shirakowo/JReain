@@ -11,6 +11,7 @@ public class Reain extends JFrame {
     private Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
     private BufferedImage bi;
     private Graphics g;
+    public Timer timer;
     private final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     private final GraphicsDevice gd = ge.getDefaultScreenDevice();
     private final DisplayMode dm = gd.getDisplayMode();
@@ -34,19 +35,15 @@ public class Reain extends JFrame {
                         break;
                     case 68:
                         blkc[0] = Color.red;
-                        drawBlocks();
                         break;
                     case 70:
                         blkc[1] = Color.red;
-                        drawBlocks();
                         break;
                     case 74:
                         blkc[2] = Color.red;
-                        drawBlocks();
                         break;
                     case 75:
                         blkc[3] = Color.red;
-                        drawBlocks();
                         break;
                     default:
                         break;
@@ -58,19 +55,15 @@ public class Reain extends JFrame {
                 switch (ke.getKeyCode()) {
                     case 68:
                         blkc[0] = Color.blue;
-                        drawBlocks();
                         break;
                     case 70:
                         blkc[1] = Color.blue;
-                        drawBlocks();
                         break;
                     case 74:
                         blkc[2] = Color.blue;
-                        drawBlocks();
                         break;
                     case 75:
                         blkc[3] = Color.blue;
-                        drawBlocks();
                         break;
                     default:
                         break;
@@ -84,6 +77,12 @@ public class Reain extends JFrame {
         Clip clip = AudioSystem.getClip();
         clip.open(audioInputStream);
         clip.start();
+
+        timer = new Timer(0, e -> {
+            drawBlocks();
+            repaint();
+        });
+        timer.start();
 
         setVisible(true);
     }
@@ -103,8 +102,6 @@ public class Reain extends JFrame {
         g.fillRect((int)(xw+108*0.5-108/2), (int)(yh*1.75), 108, 27); // Block 3
         g.setColor(blkc[3]);
         g.fillRect((int)(xw+108*1.5-108/2), (int)(yh*1.75), 108, 27); // Block 4
-
-        repaint();
     }
 
     @Override
