@@ -98,7 +98,7 @@ public class Reain extends JFrame {
 
             if (currentTime - lastTime >= 1e9) {
                 fps = frames;
-                System.out.println("FPS: " + fps);
+                Logger.logInfo("FPS: " + fps);
                 frames = 0;
                 lastTime = currentTime;
             }
