@@ -28,7 +28,7 @@ public class Note {
     }
 
     public void move() {
-        y += 10;
+        y += 20;
     }
 
     public void drawNote(Graphics g) {

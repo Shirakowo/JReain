@@ -19,6 +19,9 @@ public class Reain extends JFrame {
     private static final int sh = dm.getHeight();
     public static final int xw = sw / 2;
     public static final int yh = sh / 2;
+    private long lastTime = System.nanoTime();
+    private int frames = 0;
+    private int fps = 0;
 
     public Reain() throws Exception {
         setTitle("Reain");
@@ -88,6 +91,16 @@ public class Reain extends JFrame {
             for (Note n : note) {
                 n.move();
                 n.drawNote(g);
+            }
+
+            long currentTime = System.nanoTime();
+            frames++;
+
+            if (currentTime - lastTime >= 1e9) {
+                fps = frames;
+                System.out.println("FPS: " + fps);
+                frames = 0;
+                lastTime = currentTime;
             }
         });
         timer.start();
