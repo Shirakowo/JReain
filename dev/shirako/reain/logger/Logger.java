@@ -27,8 +27,7 @@ public class Logger {
                 color = "\u001B[31m";
                 break;
             default:
-                color = "\u001B[0m";
-                break;
+                throw new IllegalArgumentException("Invalid log type");
         }
         String m = String.format("[%s] [%s] %s%s\u001B[0m", time, type, color, msg);
         System.out.println(m);
