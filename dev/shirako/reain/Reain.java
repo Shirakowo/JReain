@@ -12,6 +12,7 @@ import dev.shirako.reain.logger.*;
 public class Reain extends JFrame {
     private Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
     private boolean[] keyPressed = {false, false, false, false}; // Track key press state
+    private boolean[] noteActive = {true, true, true, true}; // Track note activity
     private BufferedImage bi;
     private Graphics g;
     private static final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -93,12 +94,18 @@ public class Reain extends JFrame {
 
             for (int i = 0; i < note.length; i++) {
                 Note n = note[i];
-                n.move();
-                n.drawNote(g);
-                if (n.touchesBlock(xw + (i - 1.5) * 108, yh * 1.75, 108, 27)) {
-                    blkc[i] = Color.green;
-                } else if (!keyPressed[i]) {
-                    blkc[i] = Color.blue;
+                if (noteActive[i]) {
+                    n.move();
+                    n.drawNote(g);
+                    if (n.touchesBlock(xw + (i - 1.5) * 108, yh * 1.75, 108, 27)) {
+                        if (keyPressed[i]) {
+                            noteActive[i] = false; // Disable the note
+                        } else {
+                            // blkc[i] = Color.green;
+                        }
+                    } else if (!keyPressed[i]) {
+                        blkc[i] = Color.blue;
+                    }
                 }
             }
 
@@ -107,6 +114,7 @@ public class Reain extends JFrame {
                     blkc[i] = Color.red;
                 }
             }
+
             long currentTime = System.nanoTime();
             frames++;
 
@@ -126,14 +134,10 @@ public class Reain extends JFrame {
         g.setColor(getBackground());
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        g.setColor(blkc[0]);
-        g.fillRect((int)(xw-108*1.5-108/2), (int)(yh*1.75), 108, 27); // Block 1
-        g.setColor(blkc[1]);
-        g.fillRect((int)(xw-108*0.5-108/2), (int)(yh*1.75), 108, 27); // Block 2
-        g.setColor(blkc[2]);
-        g.fillRect((int)(xw+108*0.5-108/2), (int)(yh*1.75), 108, 27); // Block 3
-        g.setColor(blkc[3]);
-        g.fillRect((int)(xw+108*1.5-108/2), (int)(yh*1.75), 108, 27); // Block 4
+        for (int i = 0; i < blkc.length; i++) {
+            g.setColor(blkc[i]);
+            g.fillRect((int)(xw + (i - 1.5) * 108 - 108 / 2), (int)(yh * 1.75), 108, 27);
+        }
     }
 
     @Override
