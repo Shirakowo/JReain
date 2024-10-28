@@ -6,6 +6,7 @@ import dev.shirako.reain.Reain;
 public class Note {
     private int x; // PosX
     private int y; // PosY
+    private int speed = 5;
 
     public Note(int block) {
         switch (block) {
@@ -24,15 +25,19 @@ public class Note {
             default:
                 throw new IllegalArgumentException("The value of block is out of range");
         }
-        this.y = 0;
+        this.y = Reain.yh;
     }
 
     public void move() {
-        y += 20;
+        y += speed;
     }
 
     public void drawNote(Graphics g) {
         g.setColor(Color.white);
         g.fillRect(x, y, 108, 27);
+    }
+
+    public boolean touchesBlock(double blockX, double blockY, int blockWidth, int blockHeight) {
+        return x < blockX + blockWidth && x + 108 > blockX && y < blockY + blockHeight && y + 27 > blockY;
     }
 }

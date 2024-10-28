@@ -7,6 +7,7 @@ import javax.imageio.*;
 import javax.swing.*;
 import javax.sound.sampled.*;
 import dev.shirako.reain.core.*;
+import dev.shirako.reain.logger.*;
 
 public class Reain extends JFrame {
     private Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
@@ -26,11 +27,12 @@ public class Reain extends JFrame {
     public Reain() throws Exception {
         setTitle("Reain");
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setUndecorated(true);
         setFocusable(true);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);        
+        setExtendedState(MAXIMIZED_BOTH);        
         setIconImage(ImageIO.read(getClass().getResource("/Resources/Reain.png")));
+        setBackground(Color.black);
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent ke) {
@@ -88,9 +90,15 @@ public class Reain extends JFrame {
             drawBlocks();
             repaint();
 
-            for (Note n : note) {
+            for (int i = 0; i < note.length; i++) {
+                Note n = note[i];
                 n.move();
                 n.drawNote(g);
+                if (n.touchesBlock(xw + (i - 1.5) * 108, yh * 1.75, 108, 27)) {
+                    blkc[i] = Color.green;
+                } else {
+                    blkc[i] = Color.blue;
+                }
             }
 
             long currentTime = System.nanoTime();
@@ -127,3 +135,4 @@ public class Reain extends JFrame {
         g.drawImage(bi, 0, 0, this);
     }
 }
+
