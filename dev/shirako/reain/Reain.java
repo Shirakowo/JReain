@@ -11,6 +11,7 @@ import dev.shirako.reain.logger.*;
 
 public class Reain extends JFrame {
     private Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
+    private boolean[] keyPressed = {false, false, false, false}; // Track key press state
     private BufferedImage bi;
     private Graphics g;
     private static final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -41,16 +42,16 @@ public class Reain extends JFrame {
                         System.exit(0);
                         break;
                     case 68:
-                        blkc[0] = Color.red;
+                        keyPressed[0] = true;
                         break;
                     case 70:
-                        blkc[1] = Color.red;
+                        keyPressed[1] = true;
                         break;
                     case 74:
-                        blkc[2] = Color.red;
+                        keyPressed[2] = true;
                         break;
                     case 75:
-                        blkc[3] = Color.red;
+                        keyPressed[3] = true;
                         break;
                     default:
                         break;
@@ -61,16 +62,16 @@ public class Reain extends JFrame {
             public void keyReleased(KeyEvent ke) {
                 switch (ke.getKeyCode()) {
                     case 68:
-                        blkc[0] = Color.blue;
+                        keyPressed[0] = false;
                         break;
                     case 70:
-                        blkc[1] = Color.blue;
+                        keyPressed[1] = false;
                         break;
                     case 74:
-                        blkc[2] = Color.blue;
+                        keyPressed[2] = false;
                         break;
                     case 75:
-                        blkc[3] = Color.blue;
+                        keyPressed[3] = false;
                         break;
                     default:
                         break;
@@ -96,11 +97,16 @@ public class Reain extends JFrame {
                 n.drawNote(g);
                 if (n.touchesBlock(xw + (i - 1.5) * 108, yh * 1.75, 108, 27)) {
                     blkc[i] = Color.green;
-                } else {
+                } else if (!keyPressed[i]) {
                     blkc[i] = Color.blue;
                 }
             }
 
+            for (int i = 0; i < keyPressed.length; i++) {
+                if (keyPressed[i]) {
+                    blkc[i] = Color.red;
+                }
+            }
             long currentTime = System.nanoTime();
             frames++;
 
