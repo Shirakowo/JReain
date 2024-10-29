@@ -6,6 +6,7 @@ import java.awt.image.*;
 import javax.imageio.*;
 import javax.swing.*;
 import javax.sound.sampled.*;
+import java.io.*;
 import dev.shirako.reain.core.*;
 import dev.shirako.reain.logger.*;
 
@@ -77,6 +78,9 @@ public class Reain extends JFrame {
                         break;
                     case 75:
                         keyPressed[3] = true;
+                        break;
+                    case 123:
+                        takeScreenshot();
                         break;
                     default:
                         break;
@@ -176,6 +180,29 @@ public class Reain extends JFrame {
         g.drawString(scoreText, sw - 110, 30);
     }
 
+    private void takeScreenshot() {
+        try {
+            BufferedImage screenshot = new BufferedImage(sw, sh, BufferedImage.TYPE_INT_ARGB);
+            paint(screenshot.getGraphics());
+    
+            String timeStamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+            String baseFileName = "screenshot_" + timeStamp;
+            String fileExtension = ".png";
+            File outputFile = new File(baseFileName + fileExtension);
+    
+            int counter = 1;
+            while (outputFile.exists()) {
+                outputFile = new File(baseFileName + "_" + counter + fileExtension);
+                counter++;
+            }
+    
+            ImageIO.write(screenshot, "png", outputFile);
+            Logger.logInfo("Screenshot saved as " + outputFile.getName());
+        } catch (IOException e) {
+            Logger.logError("Failed to save screenshot: " + e.getMessage());
+        }
+    }
+    
     @Override
     public void paint(Graphics g) {
         g.drawImage(bi, 0, 0, this);
