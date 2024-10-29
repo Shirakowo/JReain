@@ -11,29 +11,6 @@ import dev.shirako.reain.core.*;
 import dev.shirako.reain.logger.*;
 
 public class Reain extends JFrame {
-    private class Game {
-        public int noteCount;
-        public float score;
-        public int combo;
-        public int maxCombo;
-        public int perfectCount;
-        public int missCount;
-
-        public void notePerfect() {
-            perfectCount++;
-            combo++;
-            score += 300;
-            if (combo > maxCombo) {
-                maxCombo = combo;
-            }
-        }
-
-        public void noteMiss() {
-            missCount++;
-            combo = 0;
-        }
-    }
-
     private Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
     private boolean[] keyPressed = {false, false, false, false}; // Track key press state
     private boolean[] noteActive = {true, true, true, true}; // Track note activity
