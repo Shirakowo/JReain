@@ -10,6 +10,29 @@ import dev.shirako.reain.core.*;
 import dev.shirako.reain.logger.*;
 
 public class Reain extends JFrame {
+    private class Game {
+        public int noteCount;
+        public float score;
+        public int combo;
+        public int maxCombo;
+        public int perfectCount;
+        public int missCount;
+
+        public void notePerfect() {
+            perfectCount++;
+            combo++;
+            score += 300;
+            if (combo > maxCombo) {
+                maxCombo = combo;
+            }
+        }
+
+        public void noteMiss() {
+            missCount++;
+            combo = 0;
+        }
+    }
+
     private Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
     private boolean[] keyPressed = {false, false, false, false}; // Track key press state
     private boolean[] noteActive = {true, true, true, true}; // Track note activity
@@ -25,6 +48,7 @@ public class Reain extends JFrame {
     private long lastTime = System.nanoTime();
     private int frames = 0;
     private int fps = 0;
+    private Game game = new Game();
 
     public Reain() throws Exception {
         setTitle("Reain");
@@ -90,6 +114,7 @@ public class Reain extends JFrame {
         Note[] note = {new Note(0), new Note(1), new Note(2), new Note(3)};
         Timer timer = new Timer(15, e -> {
             drawBlocks();
+            drawHUD();
             repaint();
 
             for (int i = 0; i < note.length; i++) {
@@ -99,12 +124,12 @@ public class Reain extends JFrame {
                     n.drawNote(g);
                     if (n.touchesBlock(xw + (i - 1.5) * 108, yh * 1.75, 108, 27)) {
                         if (keyPressed[i]) {
-                            noteActive[i] = false; // Disable the note
-                        } else {
-                            // blkc[i] = Color.green;
+                            noteActive[i] = false;
+                            game.notePerfect();
                         }
-                    } else if (!keyPressed[i]) {
-                        blkc[i] = Color.blue;
+                    } else if (n.isPastBlock(yh * 1.75 + 27)) {
+                        noteActive[i] = false;
+                        game.noteMiss();
                     }
                 }
             }
@@ -138,6 +163,17 @@ public class Reain extends JFrame {
             g.setColor(blkc[i]);
             g.fillRect((int)(xw + (i - 1.5) * 108 - 108 / 2), (int)(yh * 1.75), 108, 27);
         }
+    }
+
+    private void drawHUD() {
+        g.setColor(Color.white);
+        g.setFont(new Font("Arial", Font.BOLD, 24));
+
+        String comboText = game.combo + "x";
+        g.drawString(comboText, 10, sh - 30);
+
+        String scoreText = String.format("%08d", (int)game.score);
+        g.drawString(scoreText, sw - 110, 30);
     }
 
     @Override

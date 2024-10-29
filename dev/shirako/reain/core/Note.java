@@ -40,4 +40,7 @@ public class Note {
     public boolean touchesBlock(double blockX, double blockY, int blockWidth, int blockHeight) {
         return x < blockX + blockWidth && x + 108 > blockX && y < blockY + blockHeight && y + 27 > blockY;
     }
+    public boolean isPastBlock(double blockY) {
+        return y > blockY;
+    }
 }
