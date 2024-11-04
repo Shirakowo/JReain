@@ -1,18 +1,28 @@
 package dev.shirako.reain.logger;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Logger {
-    private static final File file = new File("Reain.log");
+    private static File file;
 
     public Logger() {
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        file = new File("Reain_" + timestamp + ".log");
 
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void log(String type, String msg) {
-        // get now time HH:mm:ss
         String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
         String color;
         switch (type) {
@@ -31,6 +41,17 @@ public class Logger {
         }
         String m = String.format("[%s] [%s] %s%s\u001B[0m", time, type, color, msg);
         System.out.println(m);
+
+        try {
+            String m0 = String.format("[%s] [%s] %s", time, type, msg);
+            FileWriter fw = new FileWriter(file, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter pw = new PrintWriter(bw);
+            pw.println(m0);
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void logInfo(String msg) {

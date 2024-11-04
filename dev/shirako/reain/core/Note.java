@@ -1,7 +1,8 @@
 package dev.shirako.reain.core;
 
-import java.awt.*;
 import dev.shirako.reain.Reain;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class Note {
     private int x; // PosX

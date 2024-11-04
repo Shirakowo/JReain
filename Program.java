@@ -1,5 +1,5 @@
 import dev.shirako.reain.Reain;
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 
 public class Program {
     public static void main(String args[]) {
