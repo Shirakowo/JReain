@@ -14,10 +14,18 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
 public class Reain extends JFrame implements ActionListener, KeyListener {
+    private class Game {
+        private static boolean started = false;
+        private static boolean paused = false;
+        private static boolean ended = false;
+    }
     private static final GraphicsEnvironment var1 = GraphicsEnvironment.getLocalGraphicsEnvironment();
     private static final GraphicsDevice var2 = var1.getDefaultScreenDevice();
     private static final DisplayMode var3 = var2.getDisplayMode();
@@ -28,6 +36,7 @@ public class Reain extends JFrame implements ActionListener, KeyListener {
     BufferedImage bi = new BufferedImage(width, height, 2);
     Graphics g = bi.getGraphics();
     Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
+    Clip clip;
 
     public Reain() throws Exception {
         super("Reain");
@@ -39,41 +48,17 @@ public class Reain extends JFrame implements ActionListener, KeyListener {
         setFocusable(true);
         setExtendedState(6);
         setBackground(Color.black);
+        setResizable(false);
         addKeyListener(this); 
-    }
-
-    public void takeScreenshot() {
-        try {
-            BufferedImage screenshot = new BufferedImage(width, height, 2);
-            paint(screenshot.getGraphics());
-    
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String baseFileName = "screenshot_" + timeStamp;
-            String fileExtension = ".png";
-            File outputFile = new File(baseFileName + fileExtension);
-    
-            int counter = 1;
-            while (outputFile.exists()) {
-                outputFile = new File(baseFileName + "_" + counter + fileExtension);
-                counter++;
-            }
-    
-            ImageIO.write(screenshot, "png", outputFile);
-            Logger.logInfo("Screenshot saved as " + outputFile.getName());
-        } catch (Exception ex) {
-            Logger.logError("Failed to save screenshot: " + ex.getMessage());
-        }
+        
     }
 
     public void drawBlocks() {
-        g.setColor(blkc[0]);
-        g.fillRect(centerX-216, (int)(centerY*1.65), 108, 27);
-        g.setColor(blkc[1]);
-        g.fillRect(centerX-108, (int)(centerY*1.65), 108, 27);
-        g.setColor(blkc[2]);
-        g.fillRect(centerX, (int)(centerY*1.65), 108, 27);
-        g.setColor(blkc[3]);
-        g.fillRect(centerX+108, (int)(centerY*1.65), 108, 27);
+        for (int i = 0; i < 4; i++) {
+            int offset = i * 108;
+            g.setColor(blkc[i]);
+            g.fillRect(centerX-216+offset, (int)(centerY*1.75), 108, 27);
+        }
     }
 
     public void draw() {
@@ -99,14 +84,20 @@ public class Reain extends JFrame implements ActionListener, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent ke) {
-        switch (ke.getKeyCode()) {
-            case 27: System.exit(0); break;
-            case 68: blkc[0] = Color.red; break;
-            case 70: blkc[1] = Color.red; break;
-            case 74: blkc[2] = Color.red; break;
-            case 75: blkc[3] = Color.red; break;
-            case 123: takeScreenshot(); break;
-            default: break;
+        // Logger.logInfo(Integer.toString(ke.getKeyCode()));
+        if (!Game.started) {
+            Game.started = true;
+            playMusic("/Harumachi.wav");
+        } else {
+            switch (ke.getKeyCode()) {
+                case 27: System.exit(0); break;
+                case 68: blkc[0] = Color.red; break;
+                case 70: blkc[1] = Color.red; break;
+                case 74: blkc[2] = Color.red; break;
+                case 75: blkc[3] = Color.red; break;
+                case 123: takeScreenshot(); break;
+                default: break;
+            }
         }
     }
 
@@ -120,4 +111,39 @@ public class Reain extends JFrame implements ActionListener, KeyListener {
             default: break;
         }
     }
+
+    public void playMusic(String file) {
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource(file));
+            clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.start();
+        } catch (Exception ex) {
+            Logger.logFatal("Failed to play music: " + ex.getMessage(), 32);
+        }
+    }
+
+    public void takeScreenshot() {
+        try {
+            BufferedImage screenshot = new BufferedImage(width, height, 2);
+            paint(screenshot.getGraphics());
+    
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String baseFileName = "screenshot_" + timeStamp;
+            String fileExtension = ".png";
+            File outputFile = new File(baseFileName + fileExtension);
+    
+            int counter = 1;
+            while (outputFile.exists()) {
+                outputFile = new File(baseFileName + "_" + counter + fileExtension);
+                counter++;
+            }
+    
+            ImageIO.write(screenshot, "png", outputFile);
+            Logger.logInfo("Screenshot saved as " + outputFile.getName());
+        } catch (Exception ex) {
+            Logger.logError("Failed to save screenshot: " + ex.getMessage());
+        }
+    }
+
 }
