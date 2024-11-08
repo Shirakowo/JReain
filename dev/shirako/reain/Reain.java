@@ -1,4 +1,4 @@
-
+package dev.shirako.reain;
 
 import java.awt.Color;
 import java.awt.DisplayMode;

@@ -5,7 +5,7 @@ public class Program {
     public static void main(String args[]) {
         SwingUtilities.invokeLater(() -> {
             try {
-                new Reain();
+                new Reain().setVisible(true);;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
