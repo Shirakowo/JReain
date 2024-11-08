@@ -1,144 +1,53 @@
 package dev.shirako.reain;
 
-import dev.shirako.reain.core.Game;
-import dev.shirako.reain.logger.Logger;
 import java.awt.Color;
 import java.awt.DisplayMode;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.event.KeyAdapter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
-public class Reain extends JFrame {
-    public Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
-    public boolean[] keyPressed = {false, false, false, false};
-    public boolean[] noteActive = {true, true, true, true};
-    public BufferedImage bi;
-    public Graphics g;
-    public static final GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    public static final GraphicsDevice gd = ge.getDefaultScreenDevice();
-    public static final DisplayMode dm = gd.getDisplayMode();
-    public static final int sw = dm.getWidth();
-    public static final int sh = dm.getHeight();
-    public static final int xw = sw / 2;
-    public static final int yh = sh / 2;
-    public long lastTime = System.nanoTime();
-    public int frames = 0;
-    public int fps = 0;
-    public Game game = new Game();
-    public Clip clip;
+public class Reain extends JFrame implements ActionListener, KeyListener {
+    private static final GraphicsEnvironment var1 = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    private static final GraphicsDevice var2 = var1.getDefaultScreenDevice();
+    private static final DisplayMode var3 = var2.getDisplayMode();
+    public static final int width = var3.getWidth();
+    public static final int height = var3.getHeight();
+    public static final int centerX = width / 2;
+    public static final int centerY = height / 2;
+    BufferedImage bi = new BufferedImage(width, height, 2);
+    Graphics g = bi.getGraphics();
+    Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
 
     public Reain() throws Exception {
+        super("Reain");
         new Logger();
-        setTitle("Reain");
+        new Timer(0, this).start();
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(3);
         setUndecorated(true);
         setFocusable(true);
-        setExtendedState(MAXIMIZED_BOTH);        
-        setIconImage(ImageIO.read(getClass().getResource("/Resources/Reain.png")));
+        setExtendedState(6);
         setBackground(Color.black);
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent ke) {
-                switch (ke.getKeyCode()) {
-                    case 27: System.exit(0);
-                    case 68: keyPressed[0] = true; break;
-                    case 70: keyPressed[1] = true; break;
-                    case 74: keyPressed[2] = true; break;
-                    case 75: keyPressed[3] = true; break;
-                    case 123: takeScreenshot(); break;
-                    default: break;
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent ke) {
-                switch (ke.getKeyCode()) {
-                    case 68: keyPressed[0] = false; break;
-                    case 70: keyPressed[1] = false; break;
-                    case 74: keyPressed[2] = false; break;
-                    case 75: keyPressed[3] = false; break;
-                    default: break;
-                }
-            }
-        });
-        bi = new BufferedImage(sw, sh, BufferedImage.TYPE_INT_ARGB);
-        g = bi.getGraphics();
-
-        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("/Resources/Harumachi/Harumachi.wav"));
-        clip = AudioSystem.getClip();
-        clip.open(audioInputStream);
-    
-        clip.start();
-
-        // Note[] note = {new Note(0), new Note(1), new Note(2), new Note(3)};
-        Timer timer = new Timer(0, e -> {
-            drawBlocks();
-            drawHUD();
-            repaint();
-
-            for (int i = 0; i < keyPressed.length; i++) {
-                if (keyPressed[i]) {
-                    blkc[i] = Color.red;
-                } else {
-                    blkc[i] = Color.blue;
-                }
-            }
-
-            long currentTime = System.nanoTime();
-            frames++;
-
-            if (currentTime - lastTime >= 1e9) {
-                fps = frames;
-                Logger.logInfo("FPS: " + fps);
-                frames = 0;
-                lastTime = currentTime;
-            }
-        });
-        timer.start();
-
-        setVisible(true);
-    }
-
-    public void drawBlocks() {
-        g.setColor(getBackground());
-        g.fillRect(0, 0, getWidth(), getHeight());
-
-        for (int i = 0; i < blkc.length; i++) {
-            g.setColor(blkc[i]);
-            g.fillRect((int)(xw + (i - 1.5) * 108 - 108 / 2), (int)(yh * 1.75), 108, 27);
-        }
-    }
-
-    public void drawHUD() {
-        g.setColor(Color.white);
-        g.setFont(new Font("Arial", Font.BOLD, 24));
-
-        String comboText = game.combo + "x";
-        g.drawString(comboText, 10, sh - 30);
-
-        String scoreText = String.format("%08d", (int)game.score);
-        g.drawString(scoreText, sw - 110, 30);
+        addKeyListener(this); 
     }
 
     public void takeScreenshot() {
         try {
-            BufferedImage screenshot = new BufferedImage(sw, sh, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage screenshot = new BufferedImage(width, height, 2);
             paint(screenshot.getGraphics());
     
-            String timeStamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String baseFileName = "screenshot_" + timeStamp;
             String fileExtension = ".png";
             File outputFile = new File(baseFileName + fileExtension);
@@ -151,18 +60,64 @@ public class Reain extends JFrame {
     
             ImageIO.write(screenshot, "png", outputFile);
             Logger.logInfo("Screenshot saved as " + outputFile.getName());
-        } catch (IOException e) {
-            Logger.logError("Failed to save screenshot: " + e.getMessage());
+        } catch (Exception ex) {
+            Logger.logError("Failed to save screenshot: " + ex.getMessage());
         }
     }
-    
+
+    public void drawBlocks() {
+        g.setColor(blkc[0]);
+        g.fillRect(centerX-216, (int)(centerY*1.65), 108, 27);
+        g.setColor(blkc[1]);
+        g.fillRect(centerX-108, (int)(centerY*1.65), 108, 27);
+        g.setColor(blkc[2]);
+        g.fillRect(centerX, (int)(centerY*1.65), 108, 27);
+        g.setColor(blkc[3]);
+        g.fillRect(centerX+108, (int)(centerY*1.65), 108, 27);
+    }
+
+    public void draw() {
+        g.clearRect(0, 0, width, height);
+        drawBlocks();
+    }
+
     @Override
     public void paint(Graphics g) {
         g.drawImage(bi, 0, 0, this);
     }
 
     @Override
-    public void dispose() {
-        super.dispose();
+    public void actionPerformed(ActionEvent ae) {
+        draw();
+        repaint();
+    }
+
+    @Override
+    public void keyTyped(KeyEvent ke) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent ke) {
+        switch (ke.getKeyCode()) {
+            case 27: System.exit(0); break;
+            case 68: blkc[0] = Color.red; break;
+            case 70: blkc[1] = Color.red; break;
+            case 74: blkc[2] = Color.red; break;
+            case 75: blkc[3] = Color.red; break;
+            case 123: takeScreenshot(); break;
+            default: break;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent ke) {
+        switch (ke.getKeyCode()) {
+            case 68: blkc[0] = Color.blue; break;
+            case 70: blkc[1] = Color.blue; break;
+            case 74: blkc[2] = Color.blue; break;
+            case 75: blkc[3] = Color.blue; break;
+            default: break;
+        }
     }
 }
