@@ -1,6 +1,7 @@
 package dev.shirako.reain;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.DisplayMode;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
@@ -17,7 +18,11 @@ import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 public class Reain extends JFrame implements ActionListener, KeyListener {
@@ -37,20 +42,68 @@ public class Reain extends JFrame implements ActionListener, KeyListener {
     Graphics g = bi.getGraphics();
     Color[] blkc = {Color.blue, Color.blue, Color.blue, Color.blue};
     Clip clip;
+    JButton resumeButton, restartButton, exitButton;
+    JPanel gamePanel;
+    JLayeredPane layeredPane;
+    BufferedImage backgroundImage;
+    float dim = 0.25f;
 
     public Reain() throws Exception {
         super("Reain");
         new Logger();
         new Timer(0, this).start();
-        setLocationRelativeTo(null);
+        
         setDefaultCloseOperation(3);
         setUndecorated(true);
-        setFocusable(true);
-        setExtendedState(6);
-        setBackground(Color.black);
+        setFocusable(true);        
         setResizable(false);
-        addKeyListener(this); 
+        setBackground(Color.black);
+        setIconImage(ImageIO.read(getClass().getResource("/assets/Reain.png")));
+        addKeyListener(this);
+        BufferedImage originalImage = ImageIO.read(getClass().getResource("/assets/Harumachi.png"));
+        backgroundImage = darkenImage(originalImage, dim);
         
+        layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(new Dimension(width, height));
+        setContentPane(layeredPane);
+
+        gamePanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(bi, 0, 0, this);
+            }
+        };
+        gamePanel.setOpaque(false);
+        gamePanel.setBounds(0, 0, width, height);
+        layeredPane.add(gamePanel, JLayeredPane.DEFAULT_LAYER);
+
+        int buttonWidth = 200;
+        int buttonHeight = 40;
+        int buttonSpacing = 20;
+        int totalHeight = 3 * buttonHeight + 2 * buttonSpacing;
+
+        resumeButton = new JButton("Resume");
+        restartButton = new JButton("Restart");
+        exitButton = new JButton("Exit");
+
+        resumeButton.setBounds(centerX - buttonWidth/2, centerY - totalHeight/2, buttonWidth, buttonHeight);
+        restartButton.setBounds(centerX - buttonWidth/2, centerY - buttonHeight/2, buttonWidth, buttonHeight);
+        exitButton.setBounds(centerX - buttonWidth/2, centerY + totalHeight/2 - buttonHeight, buttonWidth, buttonHeight);
+        
+        resumeButton.addActionListener(e -> resume());
+        restartButton.addActionListener(e -> restart());
+        exitButton.addActionListener(e -> System.exit(0));
+
+        layeredPane.add(resumeButton, JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(restartButton, JLayeredPane.PALETTE_LAYER);
+        layeredPane.add(exitButton, JLayeredPane.PALETTE_LAYER);
+
+        hideButtons();
+
+        setSize(width, height);
+        setLocationRelativeTo(null);
+        setExtendedState(6);
     }
 
     public void drawBlocks() {
@@ -63,12 +116,16 @@ public class Reain extends JFrame implements ActionListener, KeyListener {
 
     public void draw() {
         g.clearRect(0, 0, width, height);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, width, height, null);
+        }
         drawBlocks();
     }
 
     @Override
     public void paint(Graphics g) {
-        g.drawImage(bi, 0, 0, this);
+        gamePanel.repaint();
+        super.paint(g);
     }
 
     @Override
@@ -86,11 +143,14 @@ public class Reain extends JFrame implements ActionListener, KeyListener {
     public void keyPressed(KeyEvent ke) {
         // Logger.logInfo(Integer.toString(ke.getKeyCode()));
         if (!Game.started) {
-            Game.started = true;
-            playMusic("/Harumachi.wav");
-        } else {
             switch (ke.getKeyCode()) {
                 case 27: System.exit(0); break;
+                default: start(); break;
+            }
+        } else {
+            switch (ke.getKeyCode()) {
+                case 27: pause(); break;
+                case 192: restart(); break;
                 case 68: blkc[0] = Color.red; break;
                 case 70: blkc[1] = Color.red; break;
                 case 74: blkc[2] = Color.red; break;
@@ -112,15 +172,69 @@ public class Reain extends JFrame implements ActionListener, KeyListener {
         }
     }
 
-    public void playMusic(String file) {
+    private BufferedImage darkenImage(BufferedImage original, float darkenFactor) {
+        BufferedImage darkened = new BufferedImage(original.getWidth(), original.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        for (int x = 0; x < original.getWidth(); x++) {
+            for (int y = 0; y < original.getHeight(); y++) {
+                int rgb = original.getRGB(x, y);
+                int a = (rgb >> 24) & 0xff;
+                int r = (int) (((rgb >> 16) & 0xff) * darkenFactor);
+                int g = (int) (((rgb >> 8) & 0xff) * darkenFactor);
+                int b = (int) ((rgb & 0xff) * darkenFactor);
+                darkened.setRGB(x, y, (a << 24) | (r << 16) | (g << 8) | b);
+            }
+        }
+        return darkened;
+    }
+
+
+    private void hideButtons() {
+        resumeButton.setVisible(false);
+        restartButton.setVisible(false);
+        exitButton.setVisible(false);
+    }
+
+    private void showButtons() {
+        resumeButton.setVisible(true);
+        restartButton.setVisible(true);
+        exitButton.setVisible(true);
+    }
+
+    public void start() {
         try {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource(file));
+            AudioInputStream ais = AudioSystem.getAudioInputStream(getClass().getResource("/assets/Harumachi.wav".toString()));
             clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            clip.start();
+            clip.open(ais);
+            clip.start();   
         } catch (Exception ex) {
             Logger.logFatal("Failed to play music: " + ex.getMessage(), 32);
         }
+
+        Game.started = true;
+    }
+
+    public void pause() {
+        if (!Game.paused) {
+            clip.stop();
+            Game.paused = true;
+            showButtons();
+        } else {
+            resume();
+        }
+    }
+
+    private void resume() {
+        clip.start();
+        hideButtons();
+        Game.paused = false;
+    }
+
+    private void restart() {
+        clip.stop();
+        clip.setMicrosecondPosition(0);     
+        hideButtons();
+        Game.paused = false;
+        Game.started = false;
     }
 
     public void takeScreenshot() {
@@ -146,4 +260,13 @@ public class Reain extends JFrame implements ActionListener, KeyListener {
         }
     }
 
+    public static void main(String args[]) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                new Reain().setVisible(true);;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+    }
 }
