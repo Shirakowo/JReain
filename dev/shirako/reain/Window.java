@@ -12,7 +12,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 import javax.imageio.ImageIO;
 
@@ -72,6 +77,22 @@ public class Window extends Frame implements Runnable {
                 }
             }
         });
+
+        try (Socket socket = new Socket("localhost", 25565)) {
+            System.out.println("Connected to server!");
+
+            BufferedReader serverInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter serverOutput = new PrintWriter(socket.getOutputStream(), true);
+
+            serverOutput.println("owo");
+            String response = serverInput.readLine();
+            System.out.println("Server says: " + response);
+
+        } catch (IOException ex) {
+            System.out.println("Connection failed: " + ex.getMessage());
+        }
+
+        instance = this;
 
         image = ImageIO.read(new File("MarbleBlue/MarbleBlue.png"));
         buffer = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
